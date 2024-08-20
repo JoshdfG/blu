@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "./SchoolCertificate.sol";
+// import "./SchoolCertificate.sol";
 import "./SchoolsNFT.sol";
 
 contract certificateFactory {
@@ -11,18 +11,18 @@ contract certificateFactory {
         Admin = msg.sender;
     }
 
-    function createCertificateNft(
-        string memory Name,
-        string memory Symbol,
-        address institution
-    ) public returns (address) {
-        Certificate newCertificateAdd = new Certificate(
-            Name,
-            Symbol,
-            institution
-        );
-        return address(newCertificateAdd);
-    }
+    // function createCertificateNft(
+    //     string memory Name,
+    //     string memory Symbol,
+    //     address institution
+    // ) public returns (address) {
+    //     Certificate newCertificateAdd = new Certificate(
+    //         Name,
+    //         Symbol,
+    //         institution
+    //     );
+    //     return address(newCertificateAdd);
+    // }
 
     function createAttendanceNft(
         string memory Name,
@@ -30,7 +30,12 @@ contract certificateFactory {
         string memory Uri,
         address _Admin
     ) public returns (address) {
-        SchoolsNFT newSchoolsNFT = new SchoolsNFT(Name, Symbol, Uri, _Admin);
+        CustomERC1155 newSchoolsNFT = new CustomERC1155(
+            Name,
+            Symbol,
+            Uri,
+            _Admin
+        );
         return address(newSchoolsNFT);
     }
 
@@ -39,7 +44,7 @@ contract certificateFactory {
         string memory Symbol,
         address institution
     ) public returns (address) {
-        Certificate newCertificateAdd = new Certificate(
+        CustomERC1155 newCertificateAdd = new CustomERC1155(
             Name,
             Symbol,
             institution
@@ -60,7 +65,7 @@ contract certificateFactory {
             address newMentorsSpok
         )
     {
-        newCertificateAdd = createCertificateNft(Name, Symbol, _Admin);
+        // newCertificateAdd = createCertificateNft(Name, Symbol, _Admin);
         newSchoolsNFT = createAttendanceNft(Name, Symbol, Uri, _Admin);
         newMentorsSpok = createMentorsSpok(Name, Symbol, _Admin);
     }

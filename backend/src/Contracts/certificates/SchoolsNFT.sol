@@ -4,116 +4,173 @@ pragma solidity ^0.8.0;
 import "../../../lib/openzeppelin-contracts.git/contracts/token/ERC1155/ERC1155.sol";
 import "../../../lib/openzeppelin-contracts.git/contracts/access/Ownable.sol";
 
-contract MyERC1155Token is ERC1155, Ownable {
-    // Mapping to store token data
-    mapping(uint256 => TokenData) public tokenData;
-
-    // Mapping to store minting status
-    mapping(bytes32 => bool) public mintingDisabled;
-
-    // Event emitted when a new token is registered
-    event newTokenRegistered(uint256 tokenId);
-
-    // Event emitted when minting is disabled
-    event mintingDisabled(bytes32 PassCode);
-
-    // Event emitted when minting is successful
-    event mintSuccesful(address user);
-
-    // Struct to store token data
+contract CustomERC1155 is ERC1155, Ownable {
+    string public name;
+    string public symbol;
+    address public admin;
     struct TokenData {
         uint256 NftId;
         uint256 TotalMinted;
         bytes32 NftPasscode;
         uint256 dateCreated;
     }
+    TokenData[] public tokens;
 
-    // Constructor
-    constructor() ERC1155("") Ownable() {}
+    mapping(bytes32 => bool) public is_minting_Disabled;
 
-    // Function to register a new token
+    mapping(uint256 => TokenData) public tokenData;
+    mapping(address => mapping(uint256 => uint256)) private _balances;
+
+    event mintSuccesful(address user);
+    event mintingDisabled(bytes32 PassCode);
+    event newTokenRegistered(uint256 tokenId);
+
+    constructor(
+        address _admin,
+        string memory _name,
+        string memory _symbol,
+        string memory _uri
+    ) ERC1155(_uri) Ownable(_admin) {
+        transferOwnership(_admin);
+        name = _name;
+        symbol = _symbol;
+        admin = _admin;
+    }
+
     function RegisterToken(string memory tokenPassCode) public onlyOwner {
-        // Generate a new token ID
-        uint256 newTokenId = totalNft() + 1;
+        bytes32 hashedPasscode = keccak256(abi.encodePacked(tokenPassCode));
+        uint256 tokenId = uint256(hashedPasscode);
 
-        // Store token data
-        tokenData[newTokenId] = TokenData(
-            newTokenId,
-            0,
-            bytes32(keccak256(abi.encodePacked(tokenPassCode))),
-            block.timestamp
-        );
+        require(tokenData[tokenId].NftId == 0, "Token already registered");
+        TokenData memory newToken = TokenData({
+            NftId: tokenId,
+            TotalMinted: 0,
+            NftPasscode: hashedPasscode,
+            dateCreated: block.timestamp
+        });
 
-        // Emit event
-        emit newTokenRegistered(newTokenId);
+        tokenData[tokenId] = newToken;
+        tokens.push(newToken);
+
+        emit newTokenRegistered(tokenId);
     }
 
-    // Function to get all NFT data
-    function allNftData(
-        uint256 nftId
-    )
-        public
-        view
-        returns (
-            uint256 NftId,
-            uint256 TotalMinted,
-            bytes32 NftPasscode,
-            uint256 dateCreated
-        )
-    {
-        return (
-            tokenData[nftId].NftId,
-            tokenData[nftId].TotalMinted,
-            tokenData[nftId].NftPasscode,
-            tokenData[nftId].dateCreated
-        );
-    }
-
-    // Function to disable minting
     function disableMinting(string memory tokenPassCode) public onlyOwner {
-        mintingDisabled[
-            bytes32(keccak256(abi.encodePacked(tokenPassCode)))
-        ] = true;
-        emit mintingDisabled(
-            bytes32(keccak256(abi.encodePacked(tokenPassCode)))
-        );
+        bytes32 hashedPasscode = keccak256(abi.encodePacked(tokenPassCode));
+        is_minting_Disabled[hashedPasscode] = true;
+        emit mintingDisabled(hashedPasscode);
     }
 
-    // Function to check if minting is disabled
-    function isDisabled(bytes32 nftPasscode) public view returns (bool) {
-        return mintingDisabled[nftPasscode];
-    }
-
-    // Function to mint a token
     function mint(string memory NftPasscode) public {
-        // Check if minting is disabled
-        require(
-            !isDisabled(bytes32(keccak256(abi.encodePacked(NftPasscode)))),
-            "Minting is disabled"
-        );
+        bytes32 hashedPasscode = keccak256(abi.encodePacked(NftPasscode));
 
-        // Get token ID
-        uint256 tokenId = tokenData[
-            bytes32(keccak256(abi.encodePacked(NftPasscode)))
-        ].NftId;
+        require(!is_minting_Disabled[hashedPasscode], "Minting is disabled");
 
-        // Mint token
+        // Convert bytes32 to uint256 by casting directly
+        uint256 tokenId = uint256(hashedPasscode);
+
         _mint(msg.sender, tokenId, 1, "");
 
-        // Increment total minted
-        tokenData[tokenId].TotalMinted++;
+        tokenData[uint256(hashedPasscode)].TotalMinted++;
 
-        // Emit event
         emit mintSuccesful(msg.sender);
     }
 
-    // Function to get total mints
-    function totalMints(address user) public view returns (uint256) {
-        return balanceOf(user, 1);
+    function allNftData(
+        uint256 nftId
+    ) public view returns (uint256, uint256, bytes32, uint256) {
+        TokenData memory data = tokenData[nftId];
+        return (
+            data.NftId,
+            data.TotalMinted,
+            data.NftPasscode,
+            data.dateCreated
+        );
     }
 
-    // Function to get total NFTs
+    function balanceOf(
+        address account,
+        uint256 id
+    ) public view override returns (uint256) {
+        return _balances[account][id];
+    }
+
+    function balanceOfBatch(
+        address[] memory accounts,
+        uint256[] memory ids
+    ) public view override returns (uint256[] memory) {
+        uint256[] memory batchBalances = new uint256[](accounts.length);
+
+        for (uint256 i = 0; i < accounts.length; i++) {
+            batchBalances[i] = balanceOf(accounts[i], ids[i]);
+        }
+
+        return batchBalances;
+    }
+
+    function isDisabled(bytes32 nftPasscode) public view returns (bool) {
+        return is_minting_Disabled[nftPasscode];
+    }
+
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) public override {
+        require(operator != msg.sender, "ERC1155InvalidOperator");
+        _setApprovalForAll(msg.sender, operator, approved);
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 value,
+        bytes memory data
+    ) public override {
+        require(
+            from == msg.sender || isApprovedForAll(from, msg.sender),
+            "ERC1155MissingApprovalForAll"
+        );
+        _safeTransferFrom(from, to, id, value, data);
+    }
+
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory values,
+        bytes memory data
+    ) public override {
+        require(
+            from == msg.sender || isApprovedForAll(from, msg.sender),
+            "ERC1155MissingApprovalForAll"
+        );
+        _safeBatchTransferFrom(from, to, ids, values, data);
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC1155) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function setURI(string memory newuri) public onlyOwner {
+        _setURI(newuri);
+    }
+
+    function uri(uint256 id) public view override returns (string memory) {
+        return super.uri(id);
+    }
+
     function totalNft() public view returns (uint256) {
-        return ERC1155.totalSupply(1);
+        return tokens.length;
+    }
+
+    function totalMints(address user) public view returns (uint256) {
+        uint256 total = 0;
+        for (uint256 i = 0; i < tokens.length; i++) {
+            total += balanceOf(user, i);
+        }
+        return total;
     }
 }
