@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 // import "./SchoolCertificate.sol";
-import "./SchoolsNFT.sol";
+import "./employeeNFT.sol";
 
 contract certificateFactory {
     address Admin;
@@ -24,33 +24,28 @@ contract certificateFactory {
     //     return address(newCertificateAdd);
     // }
 
-    function createAttendanceNft(
+    function employee_of_the_month_NFT(
+        address _Admin,
         string memory Name,
         string memory Symbol,
-        string memory Uri,
-        address _Admin
+        string memory Uri
     ) public returns (address) {
-        CustomERC1155 newSchoolsNFT = new CustomERC1155(
-            Name,
-            Symbol,
-            Uri,
-            _Admin
-        );
-        return address(newSchoolsNFT);
+        employeeNFT newEmployeeNFT = new employeeNFT(_Admin, Name, Symbol, Uri);
+        return address(newEmployeeNFT);
     }
 
-    function createMentorsSpok(
-        string memory Name,
-        string memory Symbol,
-        address institution
-    ) public returns (address) {
-        CustomERC1155 newCertificateAdd = new CustomERC1155(
-            Name,
-            Symbol,
-            institution
-        );
-        return address(newCertificateAdd);
-    }
+    // function createMentorsSpok(
+    //     string memory Name,
+    //     string memory Symbol,
+    //     address institution
+    // ) public returns (address) {
+    //     employeeNFT newCertificateAdd = new employeeNFT(
+    //         Name,
+    //         Symbol,
+    //         institution
+    //     );
+    //     return address(newCertificateAdd);
+    // }
 
     function completePackage(
         string memory Name,
@@ -61,12 +56,12 @@ contract certificateFactory {
         external
         returns (
             address newCertificateAdd,
-            address newSchoolsNFT,
+            address newEmployeeNFT,
             address newMentorsSpok
         )
     {
         // newCertificateAdd = createCertificateNft(Name, Symbol, _Admin);
-        newSchoolsNFT = createAttendanceNft(Name, Symbol, Uri, _Admin);
-        newMentorsSpok = createMentorsSpok(Name, Symbol, _Admin);
+        newEmployeeNFT = employee_of_the_month_NFT(_Admin, Name, Symbol, Uri);
+        // newMentorsSpok = createMentorsSpok(Name, Symbol, _Admin);
     }
 }

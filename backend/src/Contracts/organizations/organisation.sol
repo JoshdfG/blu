@@ -75,17 +75,14 @@ contract organisation {
 
     // @dev: constructor initialization
     // @params: _organization: Name of company,
-    // @params: _cohort: Name of specific Cohort/ Program,
     constructor(
         string memory _organization,
-        string memory _cohort,
         address _org_owner,
         string memory _adminName,
         string memory _uri
     ) {
         org_owner = _org_owner;
         organization = _organization;
-        cohort = _cohort;
         organisationFactory = msg.sender;
         supervisor = _org_owner;
         indexInStaffsArray[_org_owner] = mentors.length;
@@ -117,7 +114,6 @@ contract organisation {
                 mentors.push(staffList[i]._address);
             }
         }
-        // UCHE
         IFACTORY(organisationFactory).register(staffList);
         emit Storage.staffsRegistered(staffList.length);
     }
@@ -197,8 +193,6 @@ contract organisation {
         return IndividualAttendanceRecord[student];
     }
 
-    // @dev Function for mentors to hand over to the next mentor to take the class
-
     function removeStaff(address[] calldata rouge_staffs) external {
         onlyModerator();
         uint mentorsRouge = rouge_staffs.length;
@@ -214,20 +208,6 @@ contract organisation {
     }
 
     //VIEW FUNCTION
-
-    // function getStudentAttendanceRatio(
-    //     address _student
-    // ) external view returns (uint attendace, uint TotalClasses) {
-    //     if (isStudent[_student] == false) revert Error.not_valid_student();
-    //     attendace = studentsTotalAttendance[_student];
-    //     TotalClasses = LectureIdCollection.length;
-    // }
-
-    // function getStudentsPresent(
-    //     bytes memory _lectureId
-    // ) external view returns (uint) {
-    //     return lectureInstance[_lectureId].studentsPresent;
-    // }
 
     function getStaffsPresent() external view returns (bool[] memory) {
         return attendanceRecord[msg.sender];

@@ -45,13 +45,8 @@ contract EcosystemTest is Test {
 
     function testCohortCreation() public {
         vm.startPrank(director);
-        (address Organisation, address OrganisationNft, ) = _organisationFactory
-            .createorganisation(
-                "WEB3BRIDGE",
-                "COHORT 9",
-                "http://test.org",
-                "Abims"
-            );
+        (address Organisation, address OrganisationNft) = _organisationFactory
+            .createorganisation("Blu_management", "http://test.org", "Abims");
         address child = _organisationFactory.getUserOrganisatons(director)[0];
 
         bool status = ICHILD(child).getOrganizationStatus();

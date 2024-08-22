@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "../../../lib/openzeppelin-contracts.git/contracts/token/ERC1155/ERC1155.sol";
 import "../../../lib/openzeppelin-contracts.git/contracts/access/Ownable.sol";
 
-contract CustomERC1155 is ERC1155, Ownable {
+contract employeeNFT is ERC1155, Ownable {
     string public name;
     string public symbol;
     address public admin;

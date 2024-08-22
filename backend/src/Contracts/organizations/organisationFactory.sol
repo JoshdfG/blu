@@ -24,14 +24,12 @@ contract organisationFactory {
 
     function createorganisation(
         string memory _organisation,
-        string memory _cohort,
         string memory _uri,
         string memory _adminName
     ) external returns (address Organisation, address Nft) {
         organisationAdmin = msg.sender;
         organisation OrganisationAddress = new organisation(
             _organisation,
-            _cohort,
             organisationAdmin,
             _adminName,
             _uri
@@ -39,12 +37,7 @@ contract organisationFactory {
         Organisations.push(address(OrganisationAddress));
         validOrganisation[address(OrganisationAddress)] = true;
         address AttendanceAddr = ICERTFACTORY(certificateFactory)
-            .completePackage(
-                _organisation,
-                _cohort,
-                _uri,
-                address(OrganisationAddress)
-            );
+            .completePackage(_organisation, _uri, address(OrganisationAddress));
 
         OrganisationAddress.initialize(address(AttendanceAddr));
         uint orgLength = memberOrganisations[msg.sender].length;
