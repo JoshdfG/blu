@@ -203,8 +203,8 @@ contract organisation {
             staffs[indexInStaffsArray[rouge_staffs[i]]] = staffs[
                 staffs.length - 1
             ];
-            staffs.pop();
             inactiveStaff.push(rouge_staffs[i]);
+            staffs.pop();
         }
         IFACTORY(organisationFactory).revoke(rouge_staffs);
         emit Storage.staffsRemoved(rouge_staffs.length);

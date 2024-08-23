@@ -151,6 +151,20 @@ contract EcosystemTest is Test {
         assertEq(false, status);
     }
 
+    function testSignAttendance() public {
+        testRegisterStaff();
+        vm.startPrank(mentorAdd);
+        uint256 currentTime = 1643723400;
+        vm.warp(currentTime);
+
+        address child = _organisationFactory.getUserOrganisatons(director)[0];
+        vm.startPrank(mentorAdd);
+        ICHILD(child).signAttendance();
+
+        currentTime = 1643719800;
+        vm.warp(currentTime);
+    }
+
     // function testZ_edit_mentors_Name() public {
     //     testMentorRegister();
     //     vm.startPrank(mentorAdd);

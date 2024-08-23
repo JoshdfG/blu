@@ -56,7 +56,7 @@ interface ICHILD {
 
     function getMentorOnDuty() external view returns (address);
 
-    function signAttendance(bytes calldata _lectureId) external;
+    function signAttendance() external;
 
     function openAttendance(bytes calldata _lectureId) external;
 
