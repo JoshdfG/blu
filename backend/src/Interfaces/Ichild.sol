@@ -20,7 +20,7 @@ interface ICHILD {
 
     function liststudents() external view returns (address[] memory);
 
-    function VerifyStudent(address _student) external view returns (bool);
+    // function VerifyStudent(address _student) external view returns (bool);
 
     function getStudentName(
         address _student
@@ -28,11 +28,11 @@ interface ICHILD {
 
     function registerStaffs(Individual[] calldata staffList) external;
 
-    function listMentors() external view returns (address[] memory);
+    function liststaff() external view returns (address[] memory);
 
-    function VerifyMentor(address _mentor) external view returns (bool);
+    function VerifyStaffs(address _mentor) external view returns (bool);
 
-    function getMentorsName(
+    function getStaffsName(
         address _Mentor
     ) external view returns (string memory name);
 
@@ -42,11 +42,15 @@ interface ICHILD {
         string calldata _topic
     ) external;
 
-    function getStudentsPresent(
+    function getStaffsPresent(
         bytes memory _lectureId
     ) external view returns (uint);
 
-    function editMentorsName(Individual[] memory _mentorsList) external;
+    function getInactiveStaffs() external view returns (address[] memory);
+
+    function getActiveStaffs() external view returns (address[] memory);
+
+    function editStaffsName(Individual[] memory _mentorsList) external;
 
     function mentorHandover(address newMentor) external;
 
@@ -74,7 +78,9 @@ interface ICHILD {
 
     function EvictStudents(address[] calldata studentsToRevoke) external;
 
-    function removeMentor(address[] calldata rouge_mentors) external;
+    function removeStaff(address[] calldata rouge_mentors) external;
+
+    function reinstateStaff(address[] calldata staffToReinstate) external;
 
     function MintCertificate(string memory Uri) external;
 

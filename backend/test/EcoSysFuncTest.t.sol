@@ -30,7 +30,7 @@ contract EcosystemTest is Test {
 
     function setUp() public {
         vm.prank(director);
-        // _certificateFactory = new certificateFactory();
+        _certificateFactory = new certificateFactory();
         _organisationFactory = new organisationFactory(
             address(_certificateFactory)
         );
@@ -43,10 +43,15 @@ contract EcosystemTest is Test {
         mentors.push(mentor);
     }
 
-    function testCohortCreation() public {
+    function testOrgCreation() public {
         vm.startPrank(director);
         (address Organisation, address OrganisationNft) = _organisationFactory
-            .createorganisation("Blu_management", "http://test.org", "Abims");
+            .createorganisation(
+                "Blu_management",
+                "http://test.org",
+                "",
+                "Abims"
+            );
         address child = _organisationFactory.getUserOrganisatons(director)[0];
 
         bool status = ICHILD(child).getOrganizationStatus();
@@ -107,22 +112,44 @@ contract EcosystemTest is Test {
     //     assertEq("MUSAA", newStudentName);
     // }
 
-    // function testMentorRegister() public {
-    //     testCohortCreation();
-    //     vm.startPrank(director);
+    function testRegisterStaff() public {
+        testOrgCreation();
+        vm.startPrank(director);
 
-    //     address child = _organisationFactory.getUserOrganisatons(director)[0];
+        address child = _organisationFactory.getUserOrganisatons(director)[0];
 
-    //     ICHILD(child).registerStaffs(mentors);
-    //     address[] memory studentsList = ICHILD(child).listMentors();
+        ICHILD(child).registerStaffs(mentors);
+        address[] memory list_of_staffs = ICHILD(child).liststaff();
 
-    //     bool mentorStatus = ICHILD(child).VerifyMentor(mentorAdd);
-    //     string memory mentorName = ICHILD(child).getMentorsName(mentorAdd);
+        bool mentorStatus = ICHILD(child).VerifyStaffs(mentorAdd);
 
-    //     assertEq(2, studentsList.length);
-    //     assertEq(true, mentorStatus);
-    //     assertEq("MR. ABIMS", mentorName);
-    // }
+        address[] memory active_staffs = ICHILD(child).getInactiveStaffs();
+
+        string memory mentorName = ICHILD(child).getStaffsName(mentorAdd);
+
+        assertEq(2, list_of_staffs.length);
+        assertEq(true, mentorStatus);
+        assertEq("MR. ABIMS", mentorName);
+    }
+
+    function testRemoveMentor() public {
+        testRegisterStaff();
+        vm.startPrank(director);
+        rogue_mentors.push(mentorAdd);
+        address child = _organisationFactory.getUserOrganisatons(director)[0];
+        ICHILD(child).removeStaff(rogue_mentors);
+        address[] memory inactive_staffs = ICHILD(child).getInactiveStaffs();
+
+        assertEq(1, inactive_staffs.length);
+
+        address[] memory mentorsList = ICHILD(child).liststaff();
+        address[] memory mentorsOrganizations = _organisationFactory
+            .getUserOrganisatons(mentorAdd);
+        bool status = ICHILD(child).VerifyStaffs(mentorAdd);
+        assertEq(0, mentorsOrganizations.length);
+        assertEq(1, mentorsList.length);
+        assertEq(false, status);
+    }
 
     // function testZ_edit_mentors_Name() public {
     //     testMentorRegister();
@@ -147,34 +174,6 @@ contract EcosystemTest is Test {
     //     console.log(newMentorsName);
 
     //     assertEq("Mr. Abimbola", newMentorsName);
-    // }
-
-    // function testFail_MentorIsNotOnDuty() public {
-    //     testMentorRegister();
-    //     vm.startPrank(mentorAdd);
-    //     address child = _organisationFactory.getUserOrganisatons(director)[0];
-
-    //     ICHILD(child).createAttendance(
-    //         "B0202",
-    //         "http://test.org",
-    //         "INTRODUCTION TO BLOCKCHAIN"
-    //     );
-
-    //     vm.stopPrank();
-    // }
-
-    // function testMentorHandOver() public {
-    //     testStudentRegister();
-    //     vm.startPrank(director);
-
-    //     address child = _organisationFactory.getUserOrganisatons(director)[0];
-    //     address mentorOnDuty1 = ICHILD(child).getMentorOnDuty();
-    //     ICHILD(child).mentorHandover(mentorAdd);
-    //     address mentorOnDuty = ICHILD(child).getMentorOnDuty();
-
-    //     assertEq(mentorOnDuty1, director);
-    //     assertEq(mentorOnDuty, mentorAdd);
-    //     vm.stopPrank();
     // }
 
     // function testCreateAttendance() public {
@@ -277,22 +276,6 @@ contract EcosystemTest is Test {
     //     assertEq(0, studentOrganizations.length);
     //     assertEq(0, studentsList.length);
     //     assertEq(false, studentStatus);
-    // }
-
-    // function testRemoveMentor() public {
-    //     testMentorRegister();
-    //     vm.startPrank(director);
-    //     rogue_mentors.push(mentorAdd);
-    //     address child = _organisationFactory.getUserOrganisatons(director)[0];
-    //     ICHILD(child).removeMentor(rogue_mentors);
-
-    //     address[] memory mentorsList = ICHILD(child).listMentors();
-    //     address[] memory mentorsOrganizations = _organisationFactory
-    //         .getUserOrganisatons(mentorAdd);
-    //     bool status = ICHILD(child).VerifyMentor(mentorAdd);
-    //     assertEq(0, mentorsOrganizations.length);
-    //     assertEq(1, mentorsList.length);
-    //     assertEq(false, status);
     // }
 
     // function testFail_EvictedStudentSignAttendance() public {

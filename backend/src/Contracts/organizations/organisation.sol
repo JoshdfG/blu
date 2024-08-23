@@ -35,7 +35,7 @@ contract organisation {
      */
     address org_owner;
     address supervisor;
-    address[] mentors;
+    address[] staffs;
     mapping(address => uint) indexInStaffsArray;
     mapping(address => bytes[]) moderatorsTopic;
     mapping(address => bool) isStaff;
@@ -85,8 +85,8 @@ contract organisation {
         organization = _organization;
         organisationFactory = msg.sender;
         supervisor = _org_owner;
-        indexInStaffsArray[_org_owner] = mentors.length;
-        mentors.push(_org_owner);
+        indexInStaffsArray[_org_owner] = staffs.length;
+        staffs.push(_org_owner);
         isStaff[_org_owner] = true;
         staffsData[_org_owner]._address = _org_owner;
         staffsData[_org_owner]._name = _adminName;
@@ -99,7 +99,7 @@ contract organisation {
         NftContract = _NftContract;
     }
 
-    // @dev: Function to register staffs to be called only by the moderator
+    // @dev: Function to register staffs to be called only by the organization owner
     // @params: staffList: An array of structs(individuals) consisting of name and wallet address of staffs.
     function registerStaffs(Individual[] calldata staffList) external {
         onlyModerator();
@@ -108,10 +108,10 @@ contract organisation {
             if (isStaff[staffList[i]._address] == false) {
                 staffsData[staffList[i]._address] = staffList[i];
                 isStaff[staffList[i]._address] = true;
-                indexInStaffsArray[staffList[i]._address] = mentors.length;
+                indexInStaffsArray[staffList[i]._address] = staffs.length;
                 isActiveStaff[staffList[i]._address] = true;
                 activeStaff.push(staffList[i]._address);
-                mentors.push(staffList[i]._address);
+                staffs.push(staffList[i]._address);
             }
         }
         IFACTORY(organisationFactory).register(staffList);
@@ -133,16 +133,16 @@ contract organisation {
     }
 
     function editStaffsName(
-        Individual[] memory _mentorsList
+        Individual[] memory _staffList
     ) external only_Staff_name_change {
-        uint staffsLength = _mentorsList.length;
+        uint staffsLength = _staffList.length;
         for (uint i; i < staffsLength; i++) {
-            if (requestNameCorrection[_mentorsList[i]._address] == true) {
-                staffsData[_mentorsList[i]._address] = _mentorsList[i];
-                requestNameCorrection[_mentorsList[i]._address] = false;
+            if (requestNameCorrection[_staffList[i]._address] == true) {
+                staffsData[_staffList[i]._address] = _staffList[i];
+                requestNameCorrection[_staffList[i]._address] = false;
             }
         }
-        emit Storage.StaffNamesChanged(_mentorsList.length);
+        emit Storage.StaffNamesChanged(_staffList.length);
     }
 
     // @dev: Function to mint nft to employee of the month
@@ -153,7 +153,7 @@ contract organisation {
         onlyModerator();
         require(spokMinted == false, "spok already minted");
         require(spokContract != address(0), "spok contract not set");
-        require(isStaff[staff] == true, "staff not found in mentors array");
+        require(isStaff[staff] == true, "staff not found in staff array");
         INFT(spokContract).mint(staff, Uri);
         spokURI = Uri;
         spokMinted = true;
@@ -183,8 +183,8 @@ contract organisation {
     }
 
     function closeAttendance() external {
-        for (uint256 i = 0; i < mentors.length; i++) {
-            address _student = mentors[i];
+        for (uint256 i = 0; i < staffs.length; i++) {
+            address _student = staffs[i];
             IndividualAttendanceRecord[_student] = false;
         }
     }
@@ -195,12 +195,15 @@ contract organisation {
 
     function removeStaff(address[] calldata rouge_staffs) external {
         onlyModerator();
-        uint mentorsRouge = rouge_staffs.length;
-        for (uint i; i < mentorsRouge; i++) {
+        uint staffRouge = rouge_staffs.length;
+        for (uint i; i < staffRouge; i++) {
+            delete staffsData[rouge_staffs[i]];
             isStaff[rouge_staffs[i]] = false;
             isActiveStaff[rouge_staffs[i]] = false;
-
-            // isInactiveStaff[rouge_staffs[i]] = true;
+            staffs[indexInStaffsArray[rouge_staffs[i]]] = staffs[
+                staffs.length - 1
+            ];
+            staffs.pop();
             inactiveStaff.push(rouge_staffs[i]);
         }
         IFACTORY(organisationFactory).revoke(rouge_staffs);
@@ -221,11 +224,11 @@ contract organisation {
         return inactiveStaff;
     }
 
-    function listMentors() external view returns (address[] memory) {
-        return mentors;
+    function liststaff() external view returns (address[] memory) {
+        return staffs;
     }
 
-    function VerifyMentor(address _mentor) external view returns (bool) {
+    function VerifyStaffs(address _mentor) external view returns (bool) {
         return isStaff[_mentor];
     }
 

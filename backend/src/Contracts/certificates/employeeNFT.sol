@@ -31,7 +31,7 @@ contract employeeNFT is ERC1155, Ownable {
         string memory _symbol,
         string memory _uri
     ) ERC1155(_uri) Ownable(_admin) {
-        transferOwnership(_admin);
+        _admin = msg.sender;
         name = _name;
         symbol = _symbol;
         admin = _admin;

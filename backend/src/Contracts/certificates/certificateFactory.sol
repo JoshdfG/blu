@@ -55,9 +55,7 @@ contract certificateFactory {
     )
         external
         returns (
-            address newCertificateAdd,
-            address newEmployeeNFT,
-            address newMentorsSpok
+            address newEmployeeNFT // address newMentorsSpok
         )
     {
         // newCertificateAdd = createCertificateNft(Name, Symbol, _Admin);

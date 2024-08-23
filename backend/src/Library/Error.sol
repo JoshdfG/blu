@@ -13,4 +13,5 @@ library Error {
     error NOT_MODERATOR();
     error NOT_MODERATOR_ON_DUTY();
     error NOT_STAFF();
+    error staff_not_found();
 }

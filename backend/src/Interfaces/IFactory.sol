@@ -10,4 +10,6 @@ interface IFACTORY {
     function register(Individual[] calldata _individual) external;
 
     function revoke(address[] calldata _individual) external;
+
+    function reinstate(address[] calldata _individual) external;
 }

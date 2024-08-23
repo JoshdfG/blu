@@ -11,8 +11,7 @@ contract organisationFactory {
     address[] public Organisations;
     mapping(address => bool) public validOrganisation;
 
-    mapping(address => mapping(address => uint))
-        public studentOrganisationIndex;
+    mapping(address => mapping(address => uint)) public staffOrganisationIndex;
     mapping(address => address[]) public memberOrganisations;
     mapping(address => bool) public uniqueStudent;
     uint public totalUsers;
@@ -25,6 +24,7 @@ contract organisationFactory {
     function createorganisation(
         string memory _organisation,
         string memory _uri,
+        string memory _symbol,
         string memory _adminName
     ) external returns (address Organisation, address Nft) {
         organisationAdmin = msg.sender;
@@ -35,18 +35,26 @@ contract organisationFactory {
             _uri
         );
         Organisations.push(address(OrganisationAddress));
-        validOrganisation[address(OrganisationAddress)] = true;
-        address AttendanceAddr = ICERTFACTORY(certificateFactory)
-            .completePackage(_organisation, _uri, address(OrganisationAddress));
 
-        OrganisationAddress.initialize(address(AttendanceAddr));
+        validOrganisation[address(OrganisationAddress)] = true;
+
+        // Updated to match the new `completePackage` signature
+        address employeNFT = ICERTFACTORY(certificateFactory).completePackage(
+            _organisation,
+            _uri,
+            _symbol,
+            address(OrganisationAddress)
+        );
+
+        OrganisationAddress.initialize(address(employeNFT));
+
         uint orgLength = memberOrganisations[msg.sender].length;
-        studentOrganisationIndex[msg.sender][
+        staffOrganisationIndex[msg.sender][
             address(OrganisationAddress)
         ] = orgLength;
         memberOrganisations[msg.sender].push(address(OrganisationAddress));
 
-        Nft = address(AttendanceAddr);
+        Nft = address(employeNFT);
         Organisation = address(OrganisationAddress);
     }
 
@@ -59,7 +67,7 @@ contract organisationFactory {
         for (uint i; i < individualLength; i++) {
             address uniqueStudentAddr = _individual[i]._address;
             uint orgLength = memberOrganisations[uniqueStudentAddr].length;
-            studentOrganisationIndex[uniqueStudentAddr][msg.sender] = orgLength;
+            staffOrganisationIndex[uniqueStudentAddr][msg.sender] = orgLength;
             memberOrganisations[uniqueStudentAddr].push(msg.sender);
             if (uniqueStudent[uniqueStudentAddr] == false) {
                 totalUsers++;
@@ -76,7 +84,7 @@ contract organisationFactory {
         uint individualLength = _individual.length;
         for (uint i; i < individualLength; i++) {
             address uniqueIndividual = _individual[i];
-            uint organisationIndex = studentOrganisationIndex[uniqueIndividual][
+            uint organisationIndex = staffOrganisationIndex[uniqueIndividual][
                 msg.sender
             ];
             uint orgLength = memberOrganisations[uniqueIndividual].length;

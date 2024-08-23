@@ -26,4 +26,5 @@ library Storage {
     event studentsEvicted(uint noOfStudents);
     event staffsRemoved(uint noOfStaffs);
     event newResultUpdated(uint256 testId, address mentor);
+    event staffsReinstated(uint noOfStaffs);
 }
