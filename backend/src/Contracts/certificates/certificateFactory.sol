@@ -25,12 +25,12 @@ contract certificateFactory {
     // }
 
     function employee_of_the_month_NFT(
-        address _Admin,
         string memory Name,
         string memory Symbol,
-        string memory Uri
+        string memory Uri,
+        address _Admin
     ) public returns (address) {
-        employeeNFT newEmployeeNFT = new employeeNFT(_Admin, Name, Symbol, Uri);
+        employeeNFT newEmployeeNFT = new employeeNFT(Name, Symbol, Uri, _Admin);
         return address(newEmployeeNFT);
     }
 
@@ -59,7 +59,8 @@ contract certificateFactory {
         )
     {
         // newCertificateAdd = createCertificateNft(Name, Symbol, _Admin);
-        newEmployeeNFT = employee_of_the_month_NFT(_Admin, Name, Symbol, Uri);
+        employeeNFT newEmployeeNFT = new employeeNFT(Name, Symbol, Uri, _Admin);
+        return address(newEmployeeNFT);
         // newMentorsSpok = createMentorsSpok(Name, Symbol, _Admin);
     }
 }

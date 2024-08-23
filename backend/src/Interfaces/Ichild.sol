@@ -42,9 +42,7 @@ interface ICHILD {
         string calldata _topic
     ) external;
 
-    function getStaffsPresent(
-        bytes memory _lectureId
-    ) external view returns (uint);
+    function getStaffsPresent() external view returns (bool[] memory);
 
     function getInactiveStaffs() external view returns (address[] memory);
 
@@ -68,13 +66,7 @@ interface ICHILD {
         address _student
     ) external view returns (uint attendace, uint TotalClasses);
 
-    function listClassesAttended(
-        address _student
-    ) external view returns (uint[] memory);
-
-    function getLectureData(
-        bytes calldata _lectureId
-    ) external view returns (lectureData memory);
+    function getAttendanceStatus(address student) external view returns (bool);
 
     function EvictStudents(address[] calldata studentsToRevoke) external;
 
@@ -85,9 +77,11 @@ interface ICHILD {
     function MintCertificate(string memory Uri) external;
 
     function mint_to_employee_of_the_month(
-        string memory Uri,
-        address staff
+        bytes memory id,
+        address _staff
     ) external;
+
+    function createNFT(bytes calldata id, string calldata _uri) external;
 
     function RequestNameCorrection() external;
 }

@@ -22,10 +22,9 @@ contract organisation {
     string public organisationImageUri;
     bool public isOngoing = true;
 
-    address public spokContract;
-    string public spokURI;
+    string public nftURI;
 
-    bool public spokMinted;
+    bool public has_minted;
     mapping(address => bool) requestNameCorrection;
 
     /**
@@ -146,17 +145,22 @@ contract organisation {
     }
 
     // @dev: Function to mint nft to employee of the month
+
+    function createNFT(bytes calldata id, string calldata _uri) external {
+        onlyModerator();
+        INFT(NftContract).setDayUri(id, _uri);
+        emit Storage.nftCreated(id, _uri, msg.sender);
+    }
+
     function mint_to_employee_of_the_month(
-        string memory Uri,
-        address staff
+        bytes memory id,
+        address _staff
     ) external {
         onlyModerator();
-        require(spokMinted == false, "spok already minted");
-        require(spokContract != address(0), "spok contract not set");
-        require(isStaff[staff] == true, "staff not found in staff array");
-        INFT(spokContract).mint(staff, Uri);
-        spokURI = Uri;
-        spokMinted = true;
+        require(has_minted == false, "spok already minted");
+        INFT(NftContract).mint(_staff, id, 1);
+        // nftURI = Uri;
+        has_minted = true;
     }
 
     function signAttendance() external {
@@ -210,7 +214,7 @@ contract organisation {
         emit Storage.staffsRemoved(rouge_staffs.length);
     }
 
-    //VIEW FUNCTION
+    //VIEW FUNCTIONS
 
     function getStaffsPresent() external view returns (bool[] memory) {
         return attendanceRecord[msg.sender];

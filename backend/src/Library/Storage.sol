@@ -27,4 +27,5 @@ library Storage {
     event staffsRemoved(uint noOfStaffs);
     event newResultUpdated(uint256 testId, address mentor);
     event staffsReinstated(uint noOfStaffs);
+    event nftCreated(bytes id, string _uri, address sender);
 }
