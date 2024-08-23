@@ -210,6 +210,16 @@ contract EcosystemTest is Test {
         ICHILD(child).getAttendanceStatus(staff_Add);
     }
 
+    function testCloseAttendance() public {
+        testSignAttendance();
+        vm.startPrank(org_owner);
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        ICHILD(child).closeAttendance();
+        ICHILD(child).getAttendanceStatus(staff_Add);
+
+        // testSignAttendance();
+    }
+
     // function testStudentsAttendanceData() public {
     //     testSignAttendance();
     //     vm.startPrank(staff_Add);

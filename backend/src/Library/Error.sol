@@ -14,4 +14,6 @@ library Error {
     error NOT_MODERATOR_ON_DUTY();
     error NOT_STAFF();
     error staff_not_found();
+    error attendance_cannot_be_closed();
+    error attendance_already_closed();
 }

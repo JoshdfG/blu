@@ -50,6 +50,8 @@ contract organisation {
 
     mapping(address => bool) public IndividualAttendanceRecord;
 
+    bool public attendanceClosed = false;
+
     // MODIFIERS
 
     function onlyModerator() private view {
@@ -145,7 +147,6 @@ contract organisation {
     }
 
     // @dev: Function to mint nft to employee of the month
-
     function createNFT(bytes calldata id, string calldata _uri) external {
         onlyModerator();
         INFT(NftContract).setDayUri(id, _uri);
@@ -157,9 +158,8 @@ contract organisation {
         address _staff
     ) external {
         onlyModerator();
-        require(has_minted == false, "spok already minted");
+        require(has_minted == false, "nft already minted");
         INFT(NftContract).mint(_staff, id, 1);
-        // nftURI = Uri;
         has_minted = true;
     }
 
@@ -176,6 +176,10 @@ contract organisation {
             revert Error.outside_allowed_hours();
         }
 
+        if (attendanceClosed) {
+            revert Error.attendance_already_closed();
+        }
+
         if (IndividualAttendanceRecord[msg.sender] == true) {
             revert Error.Already_Signed_Attendance();
         }
@@ -187,10 +191,35 @@ contract organisation {
     }
 
     function closeAttendance() external {
-        for (uint256 i = 0; i < staffs.length; i++) {
-            address _student = staffs[i];
-            IndividualAttendanceRecord[_student] = false;
+        onlyModerator();
+        uint256 currentTime = block.timestamp;
+        uint256 startOfDay = currentTime - (currentTime % 86400) + 30600; // 8am UTC (9am WAT)
+        uint256 endOfDay = startOfDay + 34200; // 5pm UTC (6pm WAT)
+        uint256 startNight = endOfDay; // 5pm UTC (6pm WAT)
+        uint256 endNight = startOfDay + 86400 - 3600; // 7am next day UTC (8am next day WAT)
+
+        if (
+            (currentTime >= endOfDay && currentTime < endNight) ||
+            currentTime >= startOfDay
+        ) {
+            for (uint256 i = 0; i < staffs.length; i++) {
+                address _student = staffs[i];
+                if (IndividualAttendanceRecord[_student]) {
+                    studentsTotalAttendance[_student] += 1;
+                    attendanceRecord[_student].push(true);
+                }
+                IndividualAttendanceRecord[_student] = false;
+                attendanceClosed = true;
+            }
+        } else {
+            revert Error.attendance_cannot_be_closed();
         }
+    }
+
+    function getAttendanceCount(
+        address _student
+    ) external view returns (uint256) {
+        return studentsTotalAttendance[_student];
     }
 
     function getAttendanceStatus(address student) external view returns (bool) {

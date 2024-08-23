@@ -83,5 +83,11 @@ interface ICHILD {
 
     function createNFT(bytes calldata id, string calldata _uri) external;
 
+    function closeAttendance() external;
+
+    function getAttendanceCount(
+        address _student
+    ) external view returns (uint256);
+
     function RequestNameCorrection() external;
 }
