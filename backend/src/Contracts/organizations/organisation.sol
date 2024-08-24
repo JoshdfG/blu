@@ -38,11 +38,11 @@ contract organisation {
     mapping(address => uint256) indexInStaffsArray;
     mapping(address => bytes[]) moderatorsTopic;
     mapping(address => bool) isStaff;
-    // mapping(address => bool) public isInactiveStaff;
     mapping(address => bool) public isActiveStaff;
     mapping(address => bool) public notActive;
     address[] public inactiveStaff;
     address[] public activeStaff;
+
     //tracking staff attendance
     mapping(address => Individual) staffsData;
     mapping(address => uint256) indexInStudentsArray;
