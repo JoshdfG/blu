@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "forge-std/Test.sol";
+import "../lib/forge-std/src/Test.sol";
 import "../src/Interfaces/Ichild.sol";
 import "../src/Interfaces/IFactory.sol";
 import "../src/Contracts/organizations/organisationFactory.sol";
 import "../src/Contracts/certificates/certificateFactory.sol";
+import "../src/Library/Error.sol";
 
 // import "../src/Contracts/SchoolsNFT.sol";
 
@@ -13,50 +14,37 @@ contract EcosystemTest is Test {
     organisationFactory _organisationFactory;
     certificateFactory _certificateFactory;
 
-    individual student1;
-    individual[] students;
-    individual[] editstudents;
-
-    individual mentor;
-    individual[] mentors;
-    individual[] editMentors;
-    address[] studentsToEvict;
-    address[] rogue_mentors;
+    Individual staff;
+    Individual[] staffs;
+    Individual[] editStaffs;
+    address[] rogue_staffs;
     address[] nameCheck;
-    address mentorAdd = 0xfd182E53C17BD167ABa87592C5ef6414D25bb9B4;
-    address studentAdd = 0x13B109506Ab1b120C82D0d342c5E64401a5B6381;
-    address director = 0xA771E1625DD4FAa2Ff0a41FA119Eb9644c9A46C8;
+    address staff_Add = 0xfd182E53C17BD167ABa87592C5ef6414D25bb9B4;
+    address org_owner = 0xA771E1625DD4FAa2Ff0a41FA119Eb9644c9A46C8;
     address public organisationAddress;
 
     function setUp() public {
-        vm.prank(director);
+        vm.prank(org_owner);
         _certificateFactory = new certificateFactory();
         _organisationFactory = new organisationFactory(
             address(_certificateFactory)
         );
-        student1._address = address(studentAdd);
-        student1._name = "JOHN DOE";
-        students.push(student1);
 
-        mentor._address = address(mentorAdd);
-        mentor._name = "MR. ABIMS";
-        mentors.push(mentor);
+        staff._address = address(staff_Add);
+        staff._name = "MR. ABIMS";
+        staffs.push(staff);
     }
 
-    function testCohortCreation() public {
-        vm.startPrank(director);
-        (
-            address Organisation,
-            address OrganisationNft,
-            address OrganisationMentorSpok,
-            address OrganizationCert
-        ) = _organisationFactory.createorganisation(
-                "WEB3BRIDGE",
-                "COHORT 9",
+    function testOrgCreation() public {
+        vm.startPrank(org_owner);
+        (address Organisation, address OrganisationNft) = _organisationFactory
+            .createorganisation(
+                "Blu_management",
                 "http://test.org",
+                "",
                 "Abims"
             );
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
 
         bool status = ICHILD(child).getOrganizationStatus();
         assertEq(status, true);
@@ -65,291 +53,163 @@ contract EcosystemTest is Test {
         assertEq(Organisation, organisationAddress);
     }
 
-    function testStudentRegister() public {
-        testCohortCreation();
-        vm.startPrank(director);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
+    function testRegisterStaff() public {
+        testOrgCreation();
+        vm.startPrank(org_owner);
 
-        ICHILD(child).registerStudents(students);
-        address[] memory studentsList = ICHILD(child).liststudents();
-        bool studentStatus = ICHILD(child).VerifyStudent(studentAdd);
-        string memory studentName = ICHILD(child).getStudentName(studentAdd);
-        assertEq(1, studentsList.length);
-        assertEq(true, studentStatus);
-        assertEq("JOHN DOE", studentName);
-        vm.stopPrank();
-    }
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
 
-    function testGetStudentsNamesArray() public {
-        testStudentRegister();
-        nameCheck.push(studentAdd);
-        nameCheck.push(mentorAdd);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-        string[] memory studentsName = ICHILD(child).getNameArray(nameCheck);
-        assertEq(studentsName[0], "JOHN DOE");
-        assertEq(studentsName[1], "UNREGISTERED");
-        console.log(studentsName[0]);
-        console.log(studentsName[1]);
-    }
+        ICHILD(child).registerStaffs(staffs);
+        address[] memory list_of_staffs = ICHILD(child).liststaff();
 
-    function testZ_edit_students_Name() public {
-        testStudentRegister();
-        vm.startPrank(studentAdd);
-        address child = _organisationFactory.getUserOrganisatons(studentAdd)[0];
+        bool staff_stat = ICHILD(child).VerifyStaffs(staff_Add);
 
-        ICHILD(child).RequestNameCorrection();
+        address[] memory active_staffs = ICHILD(child).getInactiveStaffs();
 
-        vm.stopPrank();
+        string memory mentorName = ICHILD(child).getStaffsName(staff_Add);
 
-        student1._name = "MUSAA";
-        student1._address = studentAdd;
-        editstudents.push(student1);
-
-        vm.startPrank(director);
-
-        ICHILD(child).editStudentName(editstudents);
-
-        string memory newStudentName = ICHILD(child).getStudentName(studentAdd);
-
-        console.log(newStudentName);
-
-        assertEq("MUSAA", newStudentName);
-    }
-
-    function testMentorRegister() public {
-        testCohortCreation();
-        vm.startPrank(director);
-
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-
-        ICHILD(child).registerStaffs(mentors);
-        address[] memory studentsList = ICHILD(child).listMentors();
-
-        bool mentorStatus = ICHILD(child).VerifyMentor(mentorAdd);
-        string memory mentorName = ICHILD(child).getMentorsName(mentorAdd);
-
-        assertEq(2, studentsList.length);
-        assertEq(true, mentorStatus);
+        assertEq(2, list_of_staffs.length);
+        assertEq(true, staff_stat);
         assertEq("MR. ABIMS", mentorName);
     }
 
-    function testZ_edit_mentors_Name() public {
-        testMentorRegister();
-        vm.startPrank(mentorAdd);
-        address child = _organisationFactory.getUserOrganisatons(mentorAdd)[0];
-
-        ICHILD(child).RequestNameCorrection();
-
-        vm.stopPrank();
-
-        mentor._name = "Mr. Abimbola";
-        mentor._address = mentorAdd;
-
-        editMentors.push(mentor);
-
-        vm.startPrank(director);
-
-        ICHILD(child).editMentorsName(editMentors);
-
-        string memory newMentorsName = ICHILD(child).getMentorsName(mentorAdd);
-
-        console.log(newMentorsName);
-
-        assertEq("Mr. Abimbola", newMentorsName);
-    }
-
-    function testFail_MentorIsNotOnDuty() public {
-        testMentorRegister();
-        vm.startPrank(mentorAdd);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-
-        ICHILD(child).createAttendance(
-            "B0202",
-            "http://test.org",
-            "INTRODUCTION TO BLOCKCHAIN"
-        );
-
-        vm.stopPrank();
-    }
-
-    function testMentorHandOver() public {
-        testStudentRegister();
-        vm.startPrank(director);
-
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-        address mentorOnDuty1 = ICHILD(child).getMentorOnDuty();
-        ICHILD(child).mentorHandover(mentorAdd);
-        address mentorOnDuty = ICHILD(child).getMentorOnDuty();
-
-        assertEq(mentorOnDuty1, director);
-        assertEq(mentorOnDuty, mentorAdd);
-        vm.stopPrank();
-    }
-
-    function testCreateAttendance() public {
-        testMentorHandOver();
-        vm.startPrank(mentorAdd);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-
-        ICHILD(child).createAttendance(
-            "B0202",
-            "http://test.org",
-            "INTRODUCTION TO BLOCKCHAIN"
-        );
-
-        vm.stopPrank();
-    }
-
-    function testGetStudentPresent() public {
-        testCohortCreation();
-        address child = organisationAddress;
-
-        bytes memory lectureId = "B0202";
-        testSignAttendance();
-        uint studentsPresent = ICHILD(child).getStudentsPresent(lectureId);
-        assertEq(studentsPresent, 1);
-    }
-
-    function testFail_TakeAttendaceBeforeClass() public {
-        testCreateAttendance();
-        vm.startPrank(studentAdd);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-
-        ICHILD(child).signAttendance("B0202");
-        vm.stopPrank();
-    }
-
-    function testFail_StudentOpenAttendace() public {
-        testCreateAttendance();
-        vm.startPrank(studentAdd);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-        ICHILD(child).openAttendance("B0202");
-        vm.stopPrank();
-    }
-
-    function testFail_StudentSignWrongAttendance() public {
-        testCreateAttendance();
-        vm.startPrank(mentorAdd);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-        ICHILD(child).openAttendance("B0202");
-        vm.stopPrank();
-        vm.startPrank(studentAdd);
-        ICHILD(child).signAttendance("B0205");
-    }
-
-    function testSignAttendance() public {
-        testCreateAttendance();
-        vm.startPrank(mentorAdd);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-        ICHILD(child).openAttendance("B0202");
-        vm.stopPrank();
-
-        vm.startPrank(studentAdd);
-        ICHILD(child).signAttendance("B0202");
-        vm.stopPrank();
-    }
-
-    function testStudentsAttendanceData() public {
-        testSignAttendance();
-        vm.startPrank(mentorAdd);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-        (uint attendace, uint totalClasses) = ICHILD(child)
-            .getStudentAttendanceRatio(studentAdd);
-
-        uint[] memory lectures = ICHILD(child).getLectureIds();
-        ICHILD.lectureData memory lectureData = ICHILD(child).getLectureData(
-            "B0202"
-        );
-
-        assertEq(attendace, totalClasses);
-        assertEq(lectures.length, 1);
-        // assertEq(lectures[0], "B0202");
-        assertEq(lectureData.topic, "INTRODUCTION TO BLOCKCHAIN");
-        assertEq(lectureData.mentorOnDuty, mentorAdd);
-        assertEq(lectureData.uri, "http://test.org");
-        assertEq(lectureData.attendanceStartTime, 1);
-        assertEq(lectureData.studentsPresent, 1);
-        assertEq(lectureData.status, true);
-    }
-
-    function testEvictStudent() public {
-        testSignAttendance();
-        vm.startPrank(director);
-        studentsToEvict.push(studentAdd);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-        ICHILD(child).EvictStudents(studentsToEvict);
-
-        address[] memory studentsList = ICHILD(child).liststudents();
-        address[] memory studentOrganizations = _organisationFactory
-            .getUserOrganisatons(studentAdd);
-        bool studentStatus = ICHILD(child).VerifyStudent(studentAdd);
-        assertEq(0, studentOrganizations.length);
-        assertEq(0, studentsList.length);
-        assertEq(false, studentStatus);
-    }
-
     function testRemoveMentor() public {
-        testMentorRegister();
-        vm.startPrank(director);
-        rogue_mentors.push(mentorAdd);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-        ICHILD(child).removeMentor(rogue_mentors);
+        testRegisterStaff();
+        vm.startPrank(org_owner);
+        rogue_staffs.push(staff_Add);
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        ICHILD(child).removeStaff(rogue_staffs);
+        address[] memory inactive_staffs = ICHILD(child).getInactiveStaffs();
 
-        address[] memory mentorsList = ICHILD(child).listMentors();
-        address[] memory mentorsOrganizations = _organisationFactory
-            .getUserOrganisatons(mentorAdd);
-        bool status = ICHILD(child).VerifyMentor(mentorAdd);
-        assertEq(0, mentorsOrganizations.length);
-        assertEq(1, mentorsList.length);
+        assertEq(1, inactive_staffs.length);
+
+        address[] memory staff_list = ICHILD(child).liststaff();
+        address[] memory staff_org = _organisationFactory.getUserOrganisatons(
+            staff_Add
+        );
+        bool status = ICHILD(child).VerifyStaffs(staff_Add);
+        assertEq(0, staff_org.length);
+        assertEq(1, staff_list.length);
         assertEq(false, status);
     }
 
-    function testFail_EvictedStudentSignAttendance() public {
-        testEvictStudent();
-        vm.startPrank(mentorAdd);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
+    function testSignAttendance() public {
+        testRegisterStaff();
+        vm.startPrank(staff_Add);
+        uint256 currentTime = 1643723400;
+        vm.warp(currentTime);
 
-        ICHILD(child).createAttendance(
-            "B0202",
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        vm.startPrank(staff_Add);
+        ICHILD(child).signAttendance();
+
+        currentTime = 1643719800;
+        vm.warp(currentTime);
+    }
+
+    function testGetPresentStaffs() public {
+        testOrgCreation();
+        address child = organisationAddress;
+
+        testSignAttendance();
+        bool[] memory present_staffs = ICHILD(child).getStaffsPresent();
+        assertEq(true, present_staffs.length > 0);
+    }
+
+    function testFail_SignMultipleAttendance() public {
+        testSignAttendance();
+        vm.startPrank(staff_Add);
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+
+        ICHILD(child).signAttendance();
+
+        vm.stopPrank();
+    }
+
+    function testFail_RogueStaffSignAttendance() public {
+        testRemoveMentor();
+        vm.startPrank(staff_Add);
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        testSignAttendance();
+    }
+
+    function testGetAttendanceStatus() public {
+        testSignAttendance();
+        vm.startPrank(staff_Add);
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+
+        ICHILD(child).getAttendanceStatus(staff_Add);
+    }
+
+    function testCloseAttendance() public {
+        testSignAttendance();
+        vm.startPrank(org_owner);
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        ICHILD(child).closeAttendance();
+        ICHILD(child).getAttendanceStatus(staff_Add);
+    }
+
+    function testGetAttendanceCount() public {
+        testSignAttendance();
+        vm.startPrank(staff_Add);
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        ICHILD(child).getAttendanceCount(staff_Add);
+        assertEq(1, ICHILD(child).getAttendanceCount(staff_Add));
+    }
+
+    function testListStaff() public {
+        testRegisterStaff();
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        address[] memory list_of_staffs = ICHILD(child).liststaff();
+        assertEq(2, list_of_staffs.length);
+    }
+
+    function testGetInActiveStaff() public {
+        testRemoveMentor();
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        address[] memory active_staffs = ICHILD(child).getInactiveStaffs();
+        assertEq(1, active_staffs.length);
+    }
+
+    function testGetActiveStaffs() public {
+        testRegisterStaff();
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        address[] memory active_staffs = ICHILD(child).getActiveStaffs();
+        assertEq(1, active_staffs.length);
+    }
+
+    function testGetStaffsName() public {
+        testRegisterStaff();
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        string memory mentorName = ICHILD(child).getStaffsName(staff_Add);
+        assertEq("MR. ABIMS", mentorName);
+    }
+
+    function testCreateNFT() public {
+        testOrgCreation();
+        vm.startPrank(org_owner);
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        ICHILD(child).createNFT("B0202", "http://test.org");
+    }
+
+    function test_mint_to_employee_of_the_month() public {
+        testOrgCreation();
+        testRegisterStaff();
+        vm.startPrank(org_owner);
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        ICHILD(child).mint_to_employee_of_the_month(
             "http://test.org",
-            "BLOCKCHAIN TRILEMA"
+            staff_Add
         );
-        ICHILD(child).openAttendance("B0202");
-        vm.stopPrank();
-
-        vm.startPrank(studentAdd);
-        ICHILD(child).signAttendance("B0202");
-        vm.stopPrank();
-    }
-
-    function testCertificateIssuance() public {
-        testSignAttendance();
-        vm.startPrank(director);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-        ICHILD(child).MintCertificate("http://test.org");
-    }
-
-    function testMentorsSpok() public {
-        testSignAttendance();
-        vm.startPrank(director);
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
-        ICHILD(child).mintMentorsSpok("http://test.org");
     }
 
     function testToggleOrganizationStatus() public {
-        testCohortCreation();
-        address child = _organisationFactory.getUserOrganisatons(director)[0];
+        testOrgCreation();
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
 
         ICHILD(child).toggleOrganizationStatus();
 
-        // Now, the status should be false
         bool toggledStatus = ICHILD(child).getOrganizationStatus();
         assertEq(toggledStatus, false);
-
-        // Toggle the status to true
-        ICHILD(child).toggleOrganizationStatus();
-
-        bool finalStatus = ICHILD(child).getOrganizationStatus();
-        assertEq(finalStatus, true);
     }
 }

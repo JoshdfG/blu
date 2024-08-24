@@ -10,8 +10,8 @@ contract DeployContracts is Script {
     organisationFactory _organisationFactory;
     certificateFactory _certificateFactory;
 
-    individual student1;
-    individual[] students;
+    Individual student1;
+    Individual[] students;
 
     function setUp() public {}
 
@@ -23,18 +23,13 @@ contract DeployContracts is Script {
         _organisationFactory = new organisationFactory(
             address(_certificateFactory)
         );
-        (
-            address Organisation,
-            address OrganisationNft,
-            address OrganisationMentorsSpok,
-            address OrganizationCertNft
-        ) = _organisationFactory.createorganisation(
+        (address Organisation, address OrganisationNft) = _organisationFactory
+            .createorganisation(
                 "WEB3BRIDGE",
-                "COHORT XI",
                 "http://test.org",
+                "",
                 "CHINONSO"
             );
-        // ICHILD(Organisation).registerStudents(students);
 
         vm.stopBroadcast();
         writeAddressesToFile(

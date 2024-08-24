@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "./SchoolCertificate.sol";
-import "./SchoolsNFT.sol";
+// import "./SchoolCertificate.sol";
+import "./employeeNFT.sol";
 
 contract certificateFactory {
     address Admin;
@@ -11,41 +11,41 @@ contract certificateFactory {
         Admin = msg.sender;
     }
 
-    function createCertificateNft(
-        string memory Name,
-        string memory Symbol,
-        address institution
-    ) public returns (address) {
-        Certificate newCertificateAdd = new Certificate(
-            Name,
-            Symbol,
-            institution
-        );
-        return address(newCertificateAdd);
-    }
+    // function createCertificateNft(
+    //     string memory Name,
+    //     string memory Symbol,
+    //     address institution
+    // ) public returns (address) {
+    //     Certificate newCertificateAdd = new Certificate(
+    //         Name,
+    //         Symbol,
+    //         institution
+    //     );
+    //     return address(newCertificateAdd);
+    // }
 
-    function createAttendanceNft(
+    function employee_of_the_month_NFT(
         string memory Name,
         string memory Symbol,
         string memory Uri,
         address _Admin
     ) public returns (address) {
-        SchoolsNFT newSchoolsNFT = new SchoolsNFT(Name, Symbol, Uri, _Admin);
-        return address(newSchoolsNFT);
+        employeeNFT newEmployeeNFT = new employeeNFT(Name, Symbol, Uri, _Admin);
+        return address(newEmployeeNFT);
     }
 
-    function createMentorsSpok(
-        string memory Name,
-        string memory Symbol,
-        address institution
-    ) public returns (address) {
-        Certificate newCertificateAdd = new Certificate(
-            Name,
-            Symbol,
-            institution
-        );
-        return address(newCertificateAdd);
-    }
+    // function createMentorsSpok(
+    //     string memory Name,
+    //     string memory Symbol,
+    //     address institution
+    // ) public returns (address) {
+    //     employeeNFT newCertificateAdd = new employeeNFT(
+    //         Name,
+    //         Symbol,
+    //         institution
+    //     );
+    //     return address(newCertificateAdd);
+    // }
 
     function completePackage(
         string memory Name,
@@ -55,13 +55,12 @@ contract certificateFactory {
     )
         external
         returns (
-            address newCertificateAdd,
-            address newSchoolsNFT,
-            address newMentorsSpok
+            address newEmployeeNFT // address newMentorsSpok
         )
     {
-        newCertificateAdd = createCertificateNft(Name, Symbol, _Admin);
-        newSchoolsNFT = createAttendanceNft(Name, Symbol, Uri, _Admin);
-        newMentorsSpok = createMentorsSpok(Name, Symbol, _Admin);
+        // newCertificateAdd = createCertificateNft(Name, Symbol, _Admin);
+        employeeNFT newEmployeeNFT = new employeeNFT(Name, Symbol, Uri, _Admin);
+        return address(newEmployeeNFT);
+        // newMentorsSpok = createMentorsSpok(Name, Symbol, _Admin);
     }
 }

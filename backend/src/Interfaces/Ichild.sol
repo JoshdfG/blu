@@ -16,25 +16,23 @@ interface ICHILD {
 
     function getOrganizationStatus() external view returns (bool);
 
-    function registerStudents(individual[] calldata _studentList) external;
-
     function revoke(address[] calldata _individual) external;
 
     function liststudents() external view returns (address[] memory);
 
-    function VerifyStudent(address _student) external view returns (bool);
+    // function VerifyStudent(address _student) external view returns (bool);
 
     function getStudentName(
         address _student
     ) external view returns (string memory name);
 
-    function registerStaffs(individual[] calldata staffList) external;
+    function registerStaffs(Individual[] calldata staffList) external;
 
-    function listMentors() external view returns (address[] memory);
+    function liststaff() external view returns (address[] memory);
 
-    function VerifyMentor(address _mentor) external view returns (bool);
+    function VerifyStaffs(address _mentor) external view returns (bool);
 
-    function getMentorsName(
+    function getStaffsName(
         address _Mentor
     ) external view returns (string memory name);
 
@@ -44,19 +42,19 @@ interface ICHILD {
         string calldata _topic
     ) external;
 
-    function getStudentsPresent(
-        bytes memory _lectureId
-    ) external view returns (uint);
+    function getStaffsPresent() external view returns (bool[] memory);
 
-    function editStudentName(individual[] memory _studentList) external;
+    function getInactiveStaffs() external view returns (address[] memory);
 
-    function editMentorsName(individual[] memory _mentorsList) external;
+    function getActiveStaffs() external view returns (address[] memory);
+
+    function editStaffsName(Individual[] memory _mentorsList) external;
 
     function mentorHandover(address newMentor) external;
 
     function getMentorOnDuty() external view returns (address);
 
-    function signAttendance(bytes calldata _lectureId) external;
+    function signAttendance() external;
 
     function openAttendance(bytes calldata _lectureId) external;
 
@@ -68,23 +66,28 @@ interface ICHILD {
         address _student
     ) external view returns (uint attendace, uint TotalClasses);
 
-    function listClassesAttended(
-        address _student
-    ) external view returns (uint[] memory);
-
-    function getLectureIds() external view returns (uint[] memory);
-
-    function getLectureData(
-        bytes calldata _lectureId
-    ) external view returns (lectureData memory);
+    function getAttendanceStatus(address student) external view returns (bool);
 
     function EvictStudents(address[] calldata studentsToRevoke) external;
 
-    function removeMentor(address[] calldata rouge_mentors) external;
+    function removeStaff(address[] calldata rouge_mentors) external;
+
+    function reinstateStaff(address[] calldata staffToReinstate) external;
 
     function MintCertificate(string memory Uri) external;
 
-    function mintMentorsSpok(string memory Uri) external;
+    function mint_to_employee_of_the_month(
+        bytes memory id,
+        address _staff
+    ) external;
+
+    function createNFT(bytes calldata id, string calldata _uri) external;
+
+    function closeAttendance() external;
+
+    function getAttendanceCount(
+        address _student
+    ) external view returns (uint256);
 
     function RequestNameCorrection() external;
 }
