@@ -35,17 +35,18 @@ contract organisation {
     address org_owner;
     address supervisor;
     address[] staffs;
-    mapping(address => uint) indexInStaffsArray;
+    mapping(address => uint256) indexInStaffsArray;
     mapping(address => bytes[]) moderatorsTopic;
     mapping(address => bool) isStaff;
     // mapping(address => bool) public isInactiveStaff;
     mapping(address => bool) public isActiveStaff;
+    mapping(address => bool) public notActive;
     address[] public inactiveStaff;
     address[] public activeStaff;
     //tracking staff attendance
     mapping(address => Individual) staffsData;
-    mapping(address => uint) indexInStudentsArray;
-    mapping(address => uint) studentsTotalAttendance;
+    mapping(address => uint256) indexInStudentsArray;
+    mapping(address => uint256) studentsTotalAttendance;
     mapping(address => bool[]) public attendanceRecord;
 
     mapping(address => bool) public IndividualAttendanceRecord;
@@ -95,8 +96,9 @@ contract organisation {
     }
 
     function initialize(address _NftContract) external {
-        if (msg.sender != organisationFactory)
+        if (msg.sender != organisationFactory) {
             revert Error.not_Autorized_Caller();
+        }
         NftContract = _NftContract;
     }
 
@@ -104,8 +106,8 @@ contract organisation {
     // @params: staffList: An array of structs(individuals) consisting of name and wallet address of staffs.
     function registerStaffs(Individual[] calldata staffList) external {
         onlyModerator();
-        uint staffLength = staffList.length;
-        for (uint i; i < staffLength; i++) {
+        uint256 staffLength = staffList.length;
+        for (uint256 i; i < staffLength; i++) {
             if (isStaff[staffList[i]._address] == false) {
                 staffsData[staffList[i]._address] = staffList[i];
                 isStaff[staffList[i]._address] = true;
@@ -127,8 +129,9 @@ contract organisation {
 
     // @dev: Function to request name correction
     function RequestNameCorrection() external only_Staff_name_change {
-        if (requestNameCorrection[msg.sender] == true)
+        if (requestNameCorrection[msg.sender] == true) {
             revert Error.already_requested();
+        }
         requestNameCorrection[msg.sender] = true;
         emit Storage.nameChangeRequested(msg.sender);
     }
@@ -136,8 +139,8 @@ contract organisation {
     function editStaffsName(
         Individual[] memory _staffList
     ) external only_Staff_name_change {
-        uint staffsLength = _staffList.length;
-        for (uint i; i < staffsLength; i++) {
+        uint256 staffsLength = _staffList.length;
+        for (uint256 i; i < staffsLength; i++) {
             if (requestNameCorrection[_staffList[i]._address] == true) {
                 staffsData[_staffList[i]._address] = _staffList[i];
                 requestNameCorrection[_staffList[i]._address] = false;
@@ -184,6 +187,10 @@ contract organisation {
             revert Error.Already_Signed_Attendance();
         }
 
+        if (notActive[msg.sender] == true) {
+            revert Error.NOT_ACTIVE_STAFF();
+        }
+
         IndividualAttendanceRecord[msg.sender] = true;
         studentsTotalAttendance[msg.sender] += 1;
         attendanceRecord[msg.sender].push(true);
@@ -195,7 +202,7 @@ contract organisation {
         uint256 currentTime = block.timestamp;
         uint256 startOfDay = currentTime - (currentTime % 86400) + 30600; // 8am UTC (9am WAT)
         uint256 endOfDay = startOfDay + 34200; // 5pm UTC (6pm WAT)
-        uint256 startNight = endOfDay; // 5pm UTC (6pm WAT)
+        // uint256 startNight = endOfDay; // 5pm UTC (6pm WAT)
         uint256 endNight = startOfDay + 86400 - 3600; // 7am next day UTC (8am next day WAT)
 
         if (
@@ -228,8 +235,8 @@ contract organisation {
 
     function removeStaff(address[] calldata rouge_staffs) external {
         onlyModerator();
-        uint staffRouge = rouge_staffs.length;
-        for (uint i; i < staffRouge; i++) {
+        uint256 staffRouge = rouge_staffs.length;
+        for (uint256 i; i < staffRouge; i++) {
             delete staffsData[rouge_staffs[i]];
             isStaff[rouge_staffs[i]] = false;
             isActiveStaff[rouge_staffs[i]] = false;
@@ -237,6 +244,7 @@ contract organisation {
                 staffs.length - 1
             ];
             inactiveStaff.push(rouge_staffs[i]);
+            notActive[rouge_staffs[i]] = true;
             staffs.pop();
         }
         IFACTORY(organisationFactory).revoke(rouge_staffs);

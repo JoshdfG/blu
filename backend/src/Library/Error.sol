@@ -16,4 +16,5 @@ library Error {
     error staff_not_found();
     error attendance_cannot_be_closed();
     error attendance_already_closed();
+    error NOT_ACTIVE_STAFF();
 }
