@@ -8,7 +8,7 @@ interface ICHILD {
         string topic;
         string uri;
         uint attendanceStartTime;
-        uint studentsPresent;
+        uint usersPresent;
         bool status;
     }
 
@@ -21,6 +21,10 @@ interface ICHILD {
     function liststudents() external view returns (address[] memory);
 
     // function VerifyStudent(address _student) external view returns (bool);
+
+    function getDaysData(
+        bytes calldata _lectureId
+    ) external view returns (lectureData memory);
 
     function getStudentName(
         address _student
@@ -37,12 +41,14 @@ interface ICHILD {
     ) external view returns (string memory name);
 
     function createAttendance(
-        bytes calldata _lectureId,
+        bytes calldata _dayId,
         string calldata _uri,
         string calldata _topic
     ) external;
 
-    function getStaffsPresent() external view returns (bool[] memory);
+    function getStaffsPresent(
+        bytes memory _daysId
+    ) external view returns (uint);
 
     function getInactiveStaffs() external view returns (address[] memory);
 
@@ -54,7 +60,7 @@ interface ICHILD {
 
     function getMentorOnDuty() external view returns (address);
 
-    function signAttendance() external;
+    function signAttendance(bytes memory _daysId) external;
 
     function openAttendance(bytes calldata _lectureId) external;
 
@@ -62,8 +68,8 @@ interface ICHILD {
         address[] calldata _students
     ) external view returns (string[] memory);
 
-    function getStudentAttendanceRatio(
-        address _student
+    function getUserAttendanceRatio(
+        address _user
     ) external view returns (uint attendace, uint TotalClasses);
 
     function getAttendanceStatus(address student) external view returns (bool);
@@ -89,5 +95,11 @@ interface ICHILD {
         address _student
     ) external view returns (uint256);
 
+    function getDayIds() external view returns (bytes[] memory);
+
     function RequestNameCorrection() external;
+
+    function listAttendance(
+        address _student
+    ) external view returns (bytes[] memory);
 }

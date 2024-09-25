@@ -2,7 +2,6 @@
 pragma solidity ^0.8.13;
 
 library Error {
-    // ERRORS
     error not_Autorized_Caller();
     error Attendance_compilation_started();
     error Already_Signed_Attendance();
@@ -17,4 +16,8 @@ library Error {
     error attendance_cannot_be_closed();
     error attendance_already_closed();
     error NOT_ACTIVE_STAFF();
+    error day_id_already_used();
+    error Invalid_Campaign_Id();
+    error day_id_closed();
+    error Already_Signed_Attendance_For_Id();
 }

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
-import "../../src/Interfaces/IFactory.sol";
+import "../../../Interfaces/IFactory.sol";
 
-library Storage {
+library Event {
     struct Store {
         address moderator;
     }
@@ -18,7 +18,6 @@ library Storage {
         string topic,
         address indexed staff
     );
-    event topicEditted(bytes Id, string oldTopic, string newTopic);
     event AttendanceSigned(address signer);
     event Handover(address oldMentor, address newMentor);
     event attendanceOpened(bytes Id, address mentor);
@@ -28,4 +27,6 @@ library Storage {
     event newResultUpdated(uint256 testId, address mentor);
     event staffsReinstated(uint noOfStaffs);
     event nftCreated(bytes id, string _uri, address sender);
+
+    event AttendanceSigned(bytes signedId, address signer);
 }
