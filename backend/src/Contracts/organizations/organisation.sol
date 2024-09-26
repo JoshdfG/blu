@@ -88,7 +88,7 @@ contract organisation {
 
     function getUserAttendanceRatio(
         address _user
-    ) external view returns (uint attendance, uint TotalCampaign) {
+    ) external view returns (uint attendance, uint TotalDaysAttendance) {
         AppLibrary.getUserAttendanceRatio(_user, l);
     }
 

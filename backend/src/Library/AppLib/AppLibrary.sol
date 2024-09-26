@@ -325,11 +325,11 @@ library AppLibrary {
     function getUserAttendanceRatio(
         address _user,
         Layout storage l
-    ) external view returns (uint attendance, uint TotalCampaign) {
+    ) external view returns (uint attendance, uint TotalDaysAttendance) {
         if (l.isStaff[_user] == false) revert Error.NOT_STAFF();
 
         attendance = l.staffsTotalAttendance[_user];
 
-        TotalCampaign = l.dayIdCollection.length;
+        TotalDaysAttendance = l.dayIdCollection.length;
     }
 }
