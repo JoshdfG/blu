@@ -20,8 +20,6 @@ interface ICHILD {
 
     function liststudents() external view returns (address[] memory);
 
-    // function VerifyStudent(address _student) external view returns (bool);
-
     function getDaysData(
         bytes calldata _lectureId
     ) external view returns (lectureData memory);
@@ -37,7 +35,7 @@ interface ICHILD {
     function VerifyStaffs(address _mentor) external view returns (bool);
 
     function getStaffsName(
-        address _Mentor
+        address _staff
     ) external view returns (string memory name);
 
     function createAttendance(

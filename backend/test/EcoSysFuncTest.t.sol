@@ -65,33 +65,13 @@ contract EcosystemTest is Test {
 
         bool staff_stat = ICHILD(child).VerifyStaffs(staff_Add);
 
-        address[] memory active_staffs = ICHILD(child).getInactiveStaffs();
+        address[] memory in_active_staffs = ICHILD(child).getInactiveStaffs();
 
         string memory mentorName = ICHILD(child).getStaffsName(staff_Add);
 
         assertEq(2, list_of_staffs.length);
         assertEq(true, staff_stat);
         assertEq("MR. ABIMS", mentorName);
-    }
-
-    function testRemoveMentor() public {
-        testRegisterStaff();
-        vm.startPrank(org_owner);
-        rogue_staffs.push(staff_Add);
-        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
-        ICHILD(child).removeStaff(rogue_staffs);
-        address[] memory inactive_staffs = ICHILD(child).getInactiveStaffs();
-
-        assertEq(1, inactive_staffs.length);
-
-        address[] memory staff_list = ICHILD(child).liststaff();
-        address[] memory staff_org = _organisationFactory.getUserOrganisatons(
-            staff_Add
-        );
-        bool status = ICHILD(child).VerifyStaffs(staff_Add);
-        assertEq(0, staff_org.length);
-        assertEq(1, staff_list.length);
-        assertEq(false, status);
     }
 
     function testCreateAttendance() public {
@@ -146,11 +126,31 @@ contract EcosystemTest is Test {
 
     function testGetStaffsPresent() public {
         testOrgCreation();
-        address child = organisationAddress;
-        bytes memory lectureId = "B0202";
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        bytes memory daysId = "B0202";
         testSignAttendance();
-        uint studentsPresent = ICHILD(child).getStaffsPresent(lectureId);
-        assertEq(studentsPresent, 1);
+        uint staffsPresent = ICHILD(child).getStaffsPresent(daysId);
+        assertEq(staffsPresent, 1);
+    }
+
+    function testRemoveMentor() public {
+        testRegisterStaff();
+        vm.startPrank(org_owner);
+        rogue_staffs.push(staff_Add);
+        address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
+        ICHILD(child).removeStaff(rogue_staffs);
+        address[] memory inactive_staffs = ICHILD(child).getInactiveStaffs();
+
+        assertEq(1, inactive_staffs.length);
+
+        address[] memory staff_list = ICHILD(child).liststaff();
+        address[] memory staff_org = _organisationFactory.getUserOrganisatons(
+            staff_Add
+        );
+        bool status = ICHILD(child).VerifyStaffs(staff_Add);
+        assertEq(0, staff_org.length);
+        assertEq(1, staff_list.length);
+        assertEq(false, status);
     }
 
     function testFail_RogueStaffSignAttendance() public {
@@ -159,30 +159,6 @@ contract EcosystemTest is Test {
         address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
         testSignAttendance();
     }
-
-    // function testGetAttendanceStatus() public {
-    //     testSignAttendance();
-    //     vm.startPrank(staff_Add);
-    //     address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
-
-    //     ICHILD(child).getAttendanceStatus(staff_Add);
-    // }
-
-    // function testCloseAttendance() public {
-    //     testSignAttendance();
-    //     vm.startPrank(org_owner);
-    //     address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
-    //     ICHILD(child).closeAttendance();
-    //     ICHILD(child).getAttendanceStatus(staff_Add);
-    // }
-
-    // function testGetAttendanceCount() public {
-    //     testSignAttendance();
-    //     vm.startPrank(staff_Add);
-    //     address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
-    //     ICHILD(child).getAttendanceCount(staff_Add);
-    //     assertEq(1, ICHILD(child).getAttendanceCount(staff_Add));
-    // }
 
     function testListStaff() public {
         testRegisterStaff();

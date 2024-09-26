@@ -77,18 +77,26 @@ library AppLibrary {
         Layout storage l
     ) external {
         onlyModerator(l);
+
         uint256 staffLength = staffList.length;
+
         for (uint256 i; i < staffLength; i++) {
             if (l.isStaff[staffList[i]._address] == false) {
                 l.staffsData[staffList[i]._address] = staffList[i];
+
                 l.isStaff[staffList[i]._address] = true;
+
                 l.indexInStaffsArray[staffList[i]._address] = l.staffs.length;
+
                 l.isActiveStaff[staffList[i]._address] = true;
+
                 l.activeStaff.push(staffList[i]._address);
+
                 l.staffs.push(staffList[i]._address);
             }
         }
         IFACTORY(l.organisationFactory).register(staffList);
+
         emit Event.staffsRegistered(staffList.length);
     }
 
@@ -97,7 +105,9 @@ library AppLibrary {
         Layout storage l
     ) external view returns (string[] memory) {
         string[] memory Names = new string[](_students.length);
+
         string memory emptyName;
+
         for (uint i = 0; i < _students.length; i++) {
             if (
                 keccak256(abi.encodePacked(l.staffsData[_students[i]]._name)) ==
@@ -118,17 +128,26 @@ library AppLibrary {
         onlyModerator(l);
 
         uint256 staffRouge = rouge_staffs.length;
+
         for (uint256 i; i < staffRouge; i++) {
             delete l.staffsData[rouge_staffs[i]];
+
             l.isStaff[rouge_staffs[i]] = false;
+
             l.isActiveStaff[rouge_staffs[i]] = false;
+
             l.staffs[l.indexInStaffsArray[rouge_staffs[i]]] = l.staffs[
                 l.staffs.length - 1
             ];
+
             l.inactiveStaff.push(rouge_staffs[i]);
+
             l.notActive[rouge_staffs[i]] = true;
+
             l.staffs.pop();
+
             IFACTORY(l.organisationFactory).revoke(rouge_staffs);
+
             emit Event.staffsRemoved(rouge_staffs.length);
         }
     }
@@ -147,37 +166,55 @@ library AppLibrary {
         string calldata _topic
     ) external {
         if (l.dayIdUsed[_dayId] == true) revert Error.day_id_already_used();
+
         l.dayIdUsed[_dayId] = true;
+
         l.dayIdCollection.push(_dayId);
+
         l.dayInstance[_dayId].uri = _uri;
+
         l.dayInstance[_dayId].topic = _topic;
+
         l.dayInstance[_dayId].mentorOnDuty = msg.sender;
+
         l.dayOfTheWeek[msg.sender].push(_dayId);
+
+        l.moderatorsTopic[msg.sender].push(_dayId);
+
         INFT(l.NftContract).setDayUri(_dayId, _uri);
+
         emit Event.attendanceCreated(_dayId, _uri, _topic, msg.sender);
     }
 
     function openAttendance(bytes calldata _dayId, Layout storage l) external {
         onlyModerator(l);
+
         if (l.dayIdUsed[_dayId] == false) revert Error.Invalid_Campaign_Id();
+
         if (l.dayInstance[_dayId].status == true)
             revert("Attendance already open");
+
         if (msg.sender != l.dayInstance[_dayId].mentorOnDuty)
             revert Error.not_Autorized_Caller();
 
         l.dayInstance[_dayId].status = true;
+
         emit Event.attendanceOpened(_dayId, msg.sender);
     }
 
     function closeAttendance(bytes calldata _dayId, Layout storage l) external {
         onlyModerator(l);
+
         if (l.dayIdUsed[_dayId] == false) revert Error.Invalid_Campaign_Id();
+
         if (l.dayInstance[_dayId].status == false)
             revert("Attendance already closed");
+
         if (msg.sender != l.dayInstance[_dayId].mentorOnDuty)
             revert Error.not_Autorized_Caller();
 
         l.dayInstance[_dayId].status = false;
+
         emit Event.attendanceClosed(_dayId, msg.sender);
     }
 
@@ -185,17 +222,23 @@ library AppLibrary {
         onlyStaff(l);
 
         if (l.dayIdUsed[_daysId] == false) revert Error.Invalid_Campaign_Id();
+
         if (l.notActive[msg.sender] == true) {
             revert Error.NOT_ACTIVE_STAFF();
         }
+
         if (l.dayInstance[_daysId].status == false)
             revert Error.day_id_closed();
+
         if (l.IndividualAttendanceRecord[msg.sender][_daysId] == true)
             revert Error.Already_Signed_Attendance_For_Id();
+
         if (l.dayInstance[_daysId].attendanceStartTime == 0) {
             l.dayInstance[_daysId].attendanceStartTime = block.timestamp;
         }
+
         l.IndividualAttendanceRecord[msg.sender][_daysId] = true;
+
         l.staffsTotalAttendance[msg.sender] =
             l.staffsTotalAttendance[msg.sender] +
             1;
@@ -203,8 +246,11 @@ library AppLibrary {
         l.dayInstance[_daysId].usersPresent =
             l.dayInstance[_daysId].usersPresent +
             1;
+
         l.dayAttended[msg.sender].push(_daysId);
+
         INFT(l.NftContract).mint(msg.sender, _daysId, 1);
+
         emit Event.AttendanceSigned(_daysId, msg.sender);
     }
 
@@ -215,7 +261,9 @@ library AppLibrary {
         Layout storage l
     ) external {
         onlyModerator(l);
+
         INFT(l.NftContract).setDayUri(id, _uri);
+
         emit Event.nftCreated(id, _uri, msg.sender);
     }
 
@@ -225,8 +273,11 @@ library AppLibrary {
         Layout storage l
     ) external {
         onlyModerator(l);
+
         require(l.has_minted == false, "nft already minted");
+
         INFT(l.NftContract).mint(_staff, id, 1);
+
         l.has_minted = true;
     }
 
@@ -235,16 +286,21 @@ library AppLibrary {
         Layout storage l
     ) external {
         onlyModerator(l);
+
         assert(newModerator != address(0));
+
         l.org_owner = newModerator;
     }
 
     function RequestNameCorrection(Layout storage l) external {
         only_Staff_name_change(l);
+
         if (l.requestNameCorrection[msg.sender] == true) {
             revert Error.already_requested();
         }
+
         l.requestNameCorrection[msg.sender] = true;
+
         emit Event.nameChangeRequested(msg.sender);
     }
 
@@ -253,10 +309,13 @@ library AppLibrary {
         Layout storage l
     ) external {
         only_Staff_name_change(l);
+
         uint256 staffsLength = _staffList.length;
+
         for (uint256 i; i < staffsLength; i++) {
             if (l.requestNameCorrection[_staffList[i]._address] == true) {
                 l.staffsData[_staffList[i]._address] = _staffList[i];
+
                 l.requestNameCorrection[_staffList[i]._address] = false;
             }
         }
@@ -269,7 +328,9 @@ library AppLibrary {
         Layout storage l
     ) external view returns (uint attendance, uint TotalCampaign) {
         if (l.isStaff[_user] == false) revert Error.NOT_STAFF();
+
         attendance = l.staffsTotalAttendance[_user];
+
         TotalCampaign = l.dayIdCollection.length;
     }
 }

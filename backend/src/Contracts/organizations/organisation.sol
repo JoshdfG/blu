@@ -131,6 +131,13 @@ contract organisation {
         return l.dayInstance[_daysId].usersPresent;
     }
 
+    function getTasksGiven(
+        address _moderator
+    ) external view returns (bytes[] memory) {
+        if (l.isStaff[_moderator] == false) revert Error.not_valid_Moderator();
+        return l.moderatorsTopic[_moderator];
+    }
+
     function getActiveStaffs() external view returns (address[] memory) {
         return l.activeStaff;
     }
@@ -148,10 +155,10 @@ contract organisation {
     }
 
     function getStaffsName(
-        address _Mentor
+        address _staff
     ) external view returns (string memory name) {
-        if (l.isStaff[_Mentor] == false) revert Error.not_valid_Moderator();
-        return l.staffsData[_Mentor]._name;
+        if (l.isStaff[_staff] == false) revert Error.not_valid_Moderator();
+        return l.staffsData[_staff]._name;
     }
 
     function getsupervisor() external view returns (address) {
