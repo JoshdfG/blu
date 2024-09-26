@@ -102,7 +102,7 @@ contract EcosystemTest is Test {
         vm.stopPrank();
     }
 
-    function testStudentsAttendanceData() public {
+    function testStaffssAttendanceData() public {
         testSignAttendance();
         vm.startPrank(staff_Add);
         address child = _organisationFactory.getUserOrganisatons(org_owner)[0];
@@ -116,7 +116,6 @@ contract EcosystemTest is Test {
 
         assertEq(attendace, totalClasses);
         assertEq(lectures.length, 1);
-        // assertEq(lectures[0], "B0202");
         assertEq(lectureData.mentorOnDuty, org_owner);
         assertEq(lectureData.uri, "http://test.org");
         assertEq(lectureData.attendanceStartTime, 1);

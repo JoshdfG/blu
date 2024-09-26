@@ -24,10 +24,6 @@ interface ICHILD {
         bytes calldata _lectureId
     ) external view returns (lectureData memory);
 
-    function getStudentName(
-        address _student
-    ) external view returns (string memory name);
-
     function registerStaffs(Individual[] calldata staffList) external;
 
     function liststaff() external view returns (address[] memory);

@@ -101,16 +101,16 @@ contract organisation {
     }
 
     function getNameArray(
-        address[] calldata _students
+        address[] calldata _staffs
     ) external view returns (string[] memory) {
-        AppLibrary.getNameArray(_students, l);
+        AppLibrary.getNameArray(_staffs, l);
     }
 
     function listAttendance(
-        address _student
+        address _staffs
     ) external view returns (bytes[] memory) {
-        if (l.isStaff[_student] == false) revert Error.NOT_STAFF();
-        return l.dayAttended[_student];
+        if (l.isStaff[_staffs] == false) revert Error.NOT_STAFF();
+        return l.dayAttended[_staffs];
     }
 
     function getDayIds() external view returns (bytes[] memory) {

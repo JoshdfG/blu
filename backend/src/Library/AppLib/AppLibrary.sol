@@ -35,7 +35,6 @@ library AppLibrary {
         address[] activeStaff;
         //tracking staff attendance
         mapping(address => Individual) staffsData;
-        mapping(address => uint256) indexInStudentsArray;
         mapping(address => bytes[]) dayAttended;
         mapping(address => uint256) staffsTotalAttendance;
         mapping(address => bool[]) attendanceRecord;
@@ -101,21 +100,21 @@ library AppLibrary {
     }
 
     function getNameArray(
-        address[] calldata _students,
+        address[] calldata _staffs,
         Layout storage l
     ) external view returns (string[] memory) {
-        string[] memory Names = new string[](_students.length);
+        string[] memory Names = new string[](_staffs.length);
 
         string memory emptyName;
 
-        for (uint i = 0; i < _students.length; i++) {
+        for (uint i = 0; i < _staffs.length; i++) {
             if (
-                keccak256(abi.encodePacked(l.staffsData[_students[i]]._name)) ==
+                keccak256(abi.encodePacked(l.staffsData[_staffs[i]]._name)) ==
                 keccak256(abi.encodePacked(emptyName))
             ) {
                 Names[i] = "UNREGISTERED";
             } else {
-                Names[i] = l.staffsData[_students[i]]._name;
+                Names[i] = l.staffsData[_staffs[i]]._name;
             }
         }
         return Names;
