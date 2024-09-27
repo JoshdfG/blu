@@ -8,8 +8,6 @@ import "../src/Contracts/organizations/organisationFactory.sol";
 import "../src/Contracts/certificates/certificateFactory.sol";
 import "../src/Library/Errors/OrgError/Error.sol";
 
-// import "../src/Contracts/SchoolsNFT.sol";
-
 contract EcosystemTest is Test {
     organisationFactory _organisationFactory;
 
