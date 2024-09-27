@@ -51,6 +51,13 @@ library AppLibrary {
         bool status;
     }
 
+    function initialize(address _NftContract, Layout storage l) external {
+        if (msg.sender != l.organisationFactory) {
+            revert Error.not_Autorized_Caller();
+        }
+        l.NftContract = _NftContract;
+    }
+
     function onlyModerator(Layout storage l) private view {
         if (msg.sender != l.org_owner) {
             revert Error.NOT_MODERATOR();

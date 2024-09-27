@@ -33,10 +33,7 @@ contract organisation {
     }
 
     function initialize(address _NftContract) external {
-        if (msg.sender != l.organisationFactory) {
-            revert Error.not_Autorized_Caller();
-        }
-        l.NftContract = _NftContract;
+        AppLibrary.initialize(_NftContract, l);
     }
 
     function registerStaffs(Individual[] calldata staffList) external {
