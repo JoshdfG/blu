@@ -3,10 +3,6 @@ pragma solidity ^0.8.13;
 import "../../../Interfaces/IFactory.sol";
 
 library Event {
-    struct Store {
-        address moderator;
-    }
-    // EVENTS
     event staffsRegistered(uint noOfStaffs);
     event nameChangeRequested(address changer);
     event StaffNamesChanged(uint noOfStaffs);

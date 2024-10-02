@@ -12,8 +12,6 @@ contract organisation {
 
     bool public isOngoing = true;
 
-    // @dev: constructor initialization
-    // @params: _organization: Name of company,
     constructor(
         string memory _organization,
         address _org_owner,

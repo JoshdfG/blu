@@ -16,7 +16,7 @@ contract DeployContracts is Script {
     function setUp() public {}
 
     function run() public {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
         _certificateFactory = new certificateFactory();
@@ -25,10 +25,10 @@ contract DeployContracts is Script {
         );
         (address Organisation, address OrganisationNft) = _organisationFactory
             .createorganisation(
-                "WEB3BRIDGE",
+                "BluuMangement",
                 "http://test.org",
-                "",
-                "CHINONSO"
+                "BLU",
+                "Josh"
             );
 
         vm.stopBroadcast();
@@ -41,7 +41,7 @@ contract DeployContracts is Script {
     }
 
     function writeAddressesToFile(address addr, string memory text) public {
-        string memory filename = "./deployed_contracts2.txt";
+        string memory filename = "./deployed_contracts.txt";
 
         vm.writeLine(
             filename,
