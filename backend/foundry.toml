@@ -6,7 +6,7 @@ verbosity = 5
 fs_permissions = [{ access = "read-write", path = "./"}]
 
 [rpc_endpoints]
-base = "${BASE_RPC_URL}"
+base = "${ALCHEMY_API_KEY}"
 
 [etherscan]
 base = { key = "${ETHERSCAN_API_KEY}" }

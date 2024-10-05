@@ -3,22 +3,15 @@ pragma solidity ^0.8.9;
 
 import "./organisation.sol";
 import "../../Interfaces/ICERTFACTORY.sol";
+import "../../Library/Errors/FactoryError/Error.sol";
+import "../../Library/AppLib/FactoryLibrary.sol";
 
 contract organisationFactory {
-    address public Admin;
-    address organisationAdmin;
-    address certificateFactory;
-    address[] public Organisations;
-    mapping(address => bool) public validOrganisation;
-
-    mapping(address => mapping(address => uint)) public staffOrganisationIndex;
-    mapping(address => address[]) public memberOrganisations;
-    mapping(address => bool) public uniqueStudent;
-    uint public totalUsers;
+    FactoryLibrary.Layout internal f;
 
     constructor(address certFactory) {
-        Admin = msg.sender;
-        certificateFactory = certFactory;
+        f.Admin = msg.sender;
+        f.certificateFactory = certFactory;
     }
 
     function createorganisation(
@@ -27,82 +20,30 @@ contract organisationFactory {
         string memory _symbol,
         string memory _adminName
     ) external returns (address Organisation, address Nft) {
-        organisationAdmin = msg.sender;
-        organisation OrganisationAddress = new organisation(
-            _organisation,
-            organisationAdmin,
-            _adminName,
-            _uri
-        );
-        Organisations.push(address(OrganisationAddress));
-
-        validOrganisation[address(OrganisationAddress)] = true;
-
-        // Updated to match the new `completePackage` signature
-        address employeNFT = ICERTFACTORY(certificateFactory).completePackage(
+        FactoryLibrary.createorganisation(
             _organisation,
             _uri,
             _symbol,
-            address(OrganisationAddress)
+            _adminName,
+            f
         );
-
-        OrganisationAddress.initialize(address(employeNFT));
-
-        uint orgLength = memberOrganisations[msg.sender].length;
-        staffOrganisationIndex[msg.sender][
-            address(OrganisationAddress)
-        ] = orgLength;
-        memberOrganisations[msg.sender].push(address(OrganisationAddress));
-
-        Nft = address(employeNFT);
-        Organisation = address(OrganisationAddress);
     }
 
     function register(Individual[] calldata _individual) public {
-        require(
-            validOrganisation[msg.sender] == true,
-            "unauthorized Operation"
-        );
-        uint individualLength = _individual.length;
-        for (uint i; i < individualLength; i++) {
-            address uniqueStudentAddr = _individual[i]._address;
-            uint orgLength = memberOrganisations[uniqueStudentAddr].length;
-            staffOrganisationIndex[uniqueStudentAddr][msg.sender] = orgLength;
-            memberOrganisations[uniqueStudentAddr].push(msg.sender);
-            if (uniqueStudent[uniqueStudentAddr] == false) {
-                totalUsers++;
-                uniqueStudent[uniqueStudentAddr] = true;
-            }
-        }
+        FactoryLibrary.register(_individual, f);
     }
 
     function revoke(address[] calldata _individual) public {
-        require(
-            validOrganisation[msg.sender] == true,
-            "unauthorized Operation"
-        );
-        uint individualLength = _individual.length;
-        for (uint i; i < individualLength; i++) {
-            address uniqueIndividual = _individual[i];
-            uint organisationIndex = staffOrganisationIndex[uniqueIndividual][
-                msg.sender
-            ];
-            uint orgLength = memberOrganisations[uniqueIndividual].length;
-
-            memberOrganisations[uniqueIndividual][
-                organisationIndex
-            ] = memberOrganisations[uniqueIndividual][orgLength - 1];
-            memberOrganisations[uniqueIndividual].pop();
-        }
+        FactoryLibrary.revoke(_individual, f);
     }
 
     function getOrganizations() public view returns (address[] memory) {
-        return Organisations;
+        return f.Organisations;
     }
 
     function getUserOrganisatons(
         address _userAddress
     ) public view returns (address[] memory) {
-        return (memberOrganisations[_userAddress]);
+        return (f.memberOrganisations[_userAddress]);
     }
 }
